@@ -1,0 +1,22 @@
+{
+  "name": "freefire-team-splitter",
+  "version": "1.0.0",
+  "description": "FreeFire Team Splitter - A web app for splitting players into balanced teams",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve ."
+  },
+  "keywords": [
+    "freefire",
+    "team-splitter",
+    "gaming"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  }
+}
+

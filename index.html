@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeFire Team Splitter</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Landing/Login Page -->
+    <div id="landingPage" class="landing-container">
+        <div class="landing-card">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <h1><i class="bi bi-controller"></i> FreeFire Team Splitter</h1>
+                <p>Choose your login type</p>
+            </div>
+
+            <!-- Alert Container -->
+            <div id="alertContainer"></div>
+
+            <!-- Mode Selection -->
+            <div id="modeSelection" class="text-center">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="card mode-card h-100" onclick="Router.showAdminLogin()" style="cursor: pointer;">
+                            <div class="card-body text-center p-4">
+                                <i class="bi bi-shield-lock" style="font-size: 3rem; color: #667eea;"></i>
+                                <h4 class="mt-3">Admin Panel</h4>
+                                <p class="text-muted">Manage players, rooms, and matches</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mode-card h-100" onclick="Router.showPlayerLogin()" style="cursor: pointer;">
+                            <div class="card-body text-center p-4">
+                                <i class="bi bi-person-circle" style="font-size: 3rem; color: #764ba2;"></i>
+                                <h4 class="mt-3">Player Login</h4>
+                                <p class="text-muted">Join matches and get team assignments</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Login Section -->
+            <div id="adminLoginSection" style="display: none;">
+                <h3 class="text-center mb-4"><i class="bi bi-shield-lock"></i> Admin Login</h3>
+                <form id="adminLoginForm">
+                    <div class="mb-3">
+                        <label for="adminPassword" class="form-label">Admin Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control form-control-lg" id="adminPassword" 
+                                   placeholder="Enter admin password" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-2">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary w-100" onclick="Router.showModeSelection()">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </button>
+                </form>
+            </div>
+
+            <!-- Setup Section (First Time) -->
+            <div id="setupSection" style="display: none;">
+                <h3 class="text-center mb-4"><i class="bi bi-gear"></i> Initial Setup</h3>
+                <p class="text-muted text-center mb-4">Welcome! Please set up your admin credentials and shared password.</p>
+                <form id="setupForm">
+                    <div class="mb-3">
+                        <label for="setupAdminPassword" class="form-label">Admin Password</label>
+                        <input type="password" class="form-control" id="setupAdminPassword" 
+                               placeholder="Enter admin password" required minlength="4">
+                        <small class="text-muted">This password is used to access the admin panel.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="setupSharedPassword" class="form-label">Shared Password (for players)</label>
+                        <input type="password" class="form-control" id="setupSharedPassword" 
+                               placeholder="Enter shared password" required minlength="4">
+                        <small class="text-muted">This password is used by players to access the app.</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-check-circle"></i> Complete Setup
+                    </button>
+                </form>
+            </div>
+
+            <!-- Player Login Section -->
+            <div id="playerLoginSection" style="display: none;">
+                <h3 class="text-center mb-4"><i class="bi bi-person-circle"></i> Player Login</h3>
+                <div id="setupMessage" class="alert alert-warning" style="display: none;">
+                    <i class="bi bi-exclamation-triangle"></i> 
+                    The admin needs to set up the shared password first. Please contact the administrator.
+                </div>
+                <form id="playerLoginForm">
+                    <div class="mb-3">
+                        <label for="sharedPassword" class="form-label">Enter Shared Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control form-control-lg" id="sharedPassword" 
+                                   placeholder="Enter password" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-2">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary w-100" onclick="Router.showModeSelection()">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" style="display: none;">
+        <div class="admin-container">
+            <div class="row g-0">
+                <!-- Sidebar -->
+                <div class="col-md-3 col-lg-2 admin-sidebar">
+                    <h3><i class="bi bi-shield-lock"></i> Admin Panel</h3>
+                    <ul class="admin-nav">
+                        <li><button data-nav="dashboard" class="active"><i class="bi bi-speedometer2"></i> Dashboard</button></li>
+                        <li><button data-nav="players"><i class="bi bi-people"></i> Players <span id="playerCountBadge" class="badge bg-primary">0 / 12</span></button></li>
+                        <li><button data-nav="rooms"><i class="bi bi-door-open"></i> Rooms</button></li>
+                        <li><button data-nav="matches"><i class="bi bi-trophy"></i> Matches</button></li>
+                        <li><button data-nav="settings"><i class="bi bi-gear"></i> Settings</button></li>
+                    </ul>
+                    <div class="mt-4">
+                        <button class="btn btn-outline-light w-100" onclick="Router.logout()">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-md-9 col-lg-10">
+                    <div class="admin-content">
+                        <!-- Alert Container -->
+                        <div id="adminAlertContainer"></div>
+
+                        <!-- Dashboard Section -->
+                        <div id="dashboardSection" class="admin-section" style="display: none;">
+                            <h2 class="mb-4"><i class="bi bi-speedometer2"></i> Dashboard</h2>
+                            <div class="row mb-4">
+                                <div class="col-md-4 mb-3">
+                                    <div class="stats-card">
+                                        <h3 id="dashboardPlayerCount">0</h3>
+                                        <p>Total Players</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="stats-card" style="background: var(--secondary-gradient);">
+                                        <h3 id="dashboardRoomCount">0</h3>
+                                        <p>Total Rooms</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="stats-card" style="background: var(--success-gradient);">
+                                        <h3 id="dashboardMatchCount">0</h3>
+                                        <p>Total Matches</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Quick Actions</h5>
+                                    <div class="d-grid gap-2 d-md-flex">
+                                        <button class="btn btn-primary" data-nav="players" onclick="Admin.showSection('players')">
+                                            <i class="bi bi-person-plus"></i> Add Player
+                                        </button>
+                                        <button class="btn btn-success" data-nav="rooms" onclick="Admin.showSection('rooms')">
+                                            <i class="bi bi-door-open"></i> Create Room
+                                        </button>
+                                        <button class="btn btn-info" data-nav="settings" onclick="Admin.showSection('settings')">
+                                            <i class="bi bi-key"></i> Change Password
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Players Section -->
+                        <div id="playersSection" class="admin-section" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h2><i class="bi bi-people"></i> Players Management</h2>
+                                <button id="addPlayerBtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#playerModal">
+                                    <i class="bi bi-person-plus"></i> Add Player
+                                </button>
+                            </div>
+                            <div id="playersList" class="row">
+                                <!-- Players will be rendered here -->
+                            </div>
+                        </div>
+
+                        <!-- Rooms Section -->
+                        <div id="roomsSection" class="admin-section" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h2><i class="bi bi-door-open"></i> Rooms Management</h2>
+                                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#roomModal">
+                                    <i class="bi bi-plus-circle"></i> Create Room
+                                </button>
+                            </div>
+                            <div id="roomsList" class="row">
+                                <!-- Rooms will be rendered here -->
+                            </div>
+                        </div>
+
+                        <!-- Matches Section -->
+                        <div id="matchesSection" class="admin-section" style="display: none;">
+                            <h2 class="mb-4"><i class="bi bi-trophy"></i> Matches</h2>
+                            <div id="matchesList">
+                                <!-- Matches will be rendered here -->
+                            </div>
+                        </div>
+
+                        <!-- Match Details Section -->
+                        <div id="matchDetailsSection" class="admin-section" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h2><i class="bi bi-info-circle"></i> Match Details</h2>
+                                <button class="btn btn-secondary" onclick="Admin.showSection('matches')">
+                                    <i class="bi bi-arrow-left"></i> Back
+                                </button>
+                            </div>
+                            <div id="matchDetails">
+                                <!-- Match details will be rendered here -->
+                            </div>
+                        </div>
+
+                        <!-- Settings Section -->
+                        <div id="settingsSection" class="admin-section" style="display: none;">
+                            <h2 class="mb-4"><i class="bi bi-gear"></i> Settings</h2>
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Change Shared Password</h5>
+                                            <p class="text-muted">Update the password that players use to access the app.</p>
+                                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#passwordModal">
+                                                <i class="bi bi-key"></i> Change Password
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Data Management</h5>
+                                            <p class="text-muted">Export or import application data.</p>
+                                            <div class="btn-group w-100" role="group">
+                                                <button id="exportBtn" class="btn btn-success">
+                                                    <i class="bi bi-download"></i> Export
+                                                </button>
+                                                <button id="importBtn" class="btn btn-info">
+                                                    <i class="bi bi-upload"></i> Import
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Player Interface -->
+    <div id="playerInterface" style="display: none;">
+        <div class="landing-container">
+            <div class="landing-card">
+                <!-- Logo Section -->
+                <div class="logo-section">
+                    <h1><i class="bi bi-controller"></i> FreeFire Team Splitter</h1>
+                    <p>Join your team and get ready to play!</p>
+                </div>
+
+                <!-- Alert Container -->
+                <div id="playerAlertContainer"></div>
+
+                <!-- Player Selection Section -->
+                <div id="playerSelectionSection" style="display: none;">
+                    <h3 class="mb-4 text-center">Select Your Profile</h3>
+                    <div id="playerCardsContainer" class="row">
+                        <!-- Player cards will be rendered here -->
+                    </div>
+                    <div class="text-center mt-4">
+                        <button class="btn btn-outline-secondary" onclick="Router.logout()">
+                            <i class="bi bi-arrow-left"></i> Back to Login
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Player Profile Section -->
+                <div id="playerProfileSection" style="display: none;">
+                    <div id="playerProfileDisplay">
+                        <!-- Player profile will be rendered here -->
+                    </div>
+
+                    <!-- OTP Section -->
+                    <div id="otpSection" class="text-center mb-4" style="display: none;">
+                        <button id="requestOtpBtn" class="btn btn-primary btn-lg">
+                            <i class="bi bi-shield-check"></i> Request OTP
+                        </button>
+                        <div id="otpVerified" class="alert alert-success mt-3" style="display: none;">
+                            <i class="bi bi-check-circle"></i> OTP Verified Successfully! You are now online.
+                        </div>
+                    </div>
+
+                    <!-- Match Status Section -->
+                    <div id="matchStatusSection">
+                        <!-- Available rooms will be rendered here -->
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button class="btn btn-outline-secondary" onclick="Router.logout()">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- OTP Modal -->
+    <div class="modal fade" id="otpModal" tabindex="-1" data-bs-backdrop="true" data-bs-keyboard="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">OTP Verification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="otpSentInfo" class="alert alert-info">
+                        <i class="bi bi-envelope-check"></i> <strong>OTP Sent!</strong><br>
+                        <p class="mb-0 mt-2">A 6-digit OTP has been sent to your registered email and phone number. Please check your inbox and enter the code below.</p>
+                        <p class="mb-0 mt-2"><small id="otpEmailPhone"></small></p>
+                    </div>
+                    <p class="text-muted">Expires in: <span id="otpTimer">5:00</span></p>
+                    <form id="otpVerifyForm" class="mt-4">
+                        <div class="mb-3">
+                            <label for="otpInput" class="form-label">Enter OTP</label>
+                            <input type="text" class="form-control form-control-lg text-center" 
+                                   id="otpInput" placeholder="000000" maxlength="6" 
+                                   pattern="[0-9]{6}" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-check-circle"></i> Verify OTP
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Player Modal -->
+    <div class="modal fade" id="playerModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="playerFormTitle">Add Player</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="playerForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="playerImageBase64" name="profileImageBase64">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="gameName" class="form-label">Game Name *</label>
+                                <input type="text" class="form-control" id="gameName" name="gameName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="playerLevel" class="form-label">Level *</label>
+                                <input type="number" class="form-control" id="playerLevel" name="level" 
+                                       min="1" max="100" value="50" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="playerRole" class="form-label">Role *</label>
+                            <select class="form-select" id="playerRole" name="role" required>
+                                <option value="rusher">Rusher</option>
+                                <option value="mid">Mid</option>
+                                <option value="pro">Pro</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="playerEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="playerEmail" name="email">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="playerPhone" class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="playerPhone" name="phone">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="playerImage" class="form-label">Profile Image</label>
+                            <input type="file" class="form-control" id="playerImage" accept="image/*">
+                            <small class="text-muted">Upload a profile picture (will be converted to base64)</small>
+                            <div id="playerImagePreview" class="mt-2"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Player</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Room Modal -->
+    <div class="modal fade" id="roomModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Room</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="roomForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="roomName" class="form-label">Room Name *</label>
+                            <input type="text" class="form-control" id="roomName" name="roomName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sizePerTeam" class="form-label">Team Size *</label>
+                            <select class="form-select" id="sizePerTeam" name="sizePerTeam" required>
+                                <option value="1">1v1</option>
+                                <option value="2">2v2</option>
+                                <option value="3">3v3</option>
+                                <option value="4">4v4</option>
+                                <option value="5">5v5</option>
+                                <option value="6" selected>6v6</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="roomDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="roomDescription" name="roomDescription" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Create Room</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Modal -->
+    <div class="modal fade" id="passwordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Change Shared Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="passwordForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="sharedPasswordModal" class="form-label">New Shared Password *</label>
+                            <input type="password" class="form-control" id="sharedPasswordModal" name="sharedPassword" 
+                                   required minlength="4">
+                            <small class="text-muted">This password will be used by players to access the app.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase SDK (for shared storage across devices) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <!-- EmailJS for sending OTP emails -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+      // Ensure EmailJS loads before other scripts
+      if (typeof emailjs === 'undefined') {
+        console.error('❌ EmailJS failed to load from CDN');
+      } else {
+        console.log('✅ EmailJS loaded from CDN');
+      }
+      
+      // Check Firebase
+      if (typeof firebase === 'undefined') {
+        console.warn('⚠️ Firebase not loaded - will use localStorage only');
+      } else {
+        console.log('✅ Firebase loaded');
+      }
+    </script>
+    <!-- Firebase Configuration -->
+    <script src="js/firebase-config.js"></script>
+    <!-- Email Configuration -->
+    <script src="js/email-config.js"></script>
+    <script>
+      // Verify EmailJS loaded and initialize
+      window.addEventListener('load', () => {
+        if (typeof emailjs === 'undefined') {
+          console.error('❌ EmailJS library failed to load. Check internet connection.');
+        } else {
+          console.log('✅ EmailJS library loaded successfully');
+          console.log('EmailJS version:', emailjs.version || 'unknown');
+          
+          // Pre-initialize EmailJS if config is available
+          if (window.EmailConfig && window.EmailConfig.publicKey && window.EmailConfig.publicKey !== 'YOUR_PUBLIC_KEY') {
+            try {
+              emailjs.init(window.EmailConfig.publicKey);
+              window.emailjsInitialized = true;
+              console.log('✅ EmailJS initialized with public key:', window.EmailConfig.publicKey);
+            } catch (error) {
+              console.error('❌ Failed to initialize EmailJS:', error);
+            }
+          }
+        }
+      });
+    </script>
+    <!-- App Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/teamgen.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/router.js"></script>
+</body>
+</html>
